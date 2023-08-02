@@ -3,6 +3,10 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <sys/times.h>
+#include <sys/resource.h>
+#include <ctime>
+#include <unistd.h>
 
 using namespace std;
 
@@ -556,6 +560,24 @@ void mostrarMenu()
 
 int main()
 {
+  std::clock_t start_time = std::clock();
+  struct rusage usage;
   mostrarMenu();
+  std::clock_t end_time = std::clock();
+  double cpu_time_used = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC;
+  int ret = getrusage(RUSAGE_SELF, &usage);
+
+  if (ret == 0)
+  {
+    long memory_usage = usage.ru_maxrss; // Uso máximo de resident set size (en kilobytes)
+    std::cout << "Uso de memoria: " << memory_usage << " KB.\n";
+  }
+  else
+  {
+    std::cerr << "Error al obtener el uso de memoria.\n";
+  }
+
+
+  std::cout << "Tiempo de CPU utilizado: " << cpu_time_used << " segundos.\n";
   return 0;
 }
